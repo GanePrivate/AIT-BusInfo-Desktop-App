@@ -1,4 +1,3 @@
-import org.jetbrains.skia.impl.Log
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -6,7 +5,7 @@ import java.time.format.DateTimeFormatter
 data class daiyaData(
     val daiya: String?,
     val toDaigaku: Map<Int, List<Int>?>,
-    val toYakusa:  Map<Int, List<Int>?>,
+    val toYakusa: Map<Int, List<Int>?>,
     val toDaigakuFirst: Int,
     val toYakusaFirst: Int
 )
@@ -31,13 +30,13 @@ data class ReturnData(
 )
 
 
-fun getNearVal(minutes: List<Int>?, mode: Int = 0, reset: Boolean = false): Int {
+fun getNearVal(minutes: List<Int>?, mode: Int = 0, isReset: Boolean = false): Int {
     /*
     最も近い値を返す関数
     mode = 0:通常の処理,  1:次の時間の処理,  3:次の次の時間の処理
     :param minutes:     # array:その時間の時刻表(分)の配列データ
     :param mode:        # int：動作モードを指定する値
-    :param reset:       # bool：時間(分)をリセットするか
+    :param isReset:     # bool：時間(分)をリセットするか
     :return:            # int：現在時刻から一番近い出発時間(分)
     */
 
@@ -49,35 +48,28 @@ fun getNearVal(minutes: List<Int>?, mode: Int = 0, reset: Boolean = false): Int 
     if (size < 1 || minutes == null) return -1
 
     // 今の時間(分)
-    var now_minutes: Int = LocalTime.now().minute
-
-
-    // for (var key in minutes){
-    //     if (minutes.hasOwnProperty(key)){
-    //         console.log(key, minutes[key]);
-    //     }
-    // }
+    var nowMinutes: Int = LocalTime.now().minute
 
     // 現在時間+1の時刻表データ(分)を返す処理
     if (mode == 1) return minutes[0]
 
     // リセットフラグを確認する
-    if (reset) now_minutes = 0
+    if (isReset) nowMinutes = 0
 
-    var l_flag: Boolean = false
+    var isNotThisHour: Boolean = false
     // 次の発車時間が見つかったらその時間を返す
-    for (i in 0..size-1) {
-        if (minutes[i] >= now_minutes && mode == 0) {
+    for (i in 0 until size) {
+        if (minutes[i] >= nowMinutes && mode == 0) {
             return minutes[i]
         }
 
         // 次の次のバスの時刻を返す
-        if (minutes[i] >= now_minutes && mode == 3 && l_flag) {
+        if (minutes[i] >= nowMinutes && mode == 3 && isNotThisHour) {
             return minutes[i]
         }
 
-        if (minutes[i] >= now_minutes && mode == 3) {
-            l_flag = true
+        if (minutes[i] >= nowMinutes && mode == 3) {
+            isNotThisHour = true
         }
     }
 
@@ -89,7 +81,8 @@ fun getNearVal(minutes: List<Int>?, mode: Int = 0, reset: Boolean = false): Int 
 fun getTodayTimetable(): daiyaData {
     /*
     今日の時刻表データを返す関数
-    :return:    # array：toDaigaku  大学行きの今日の時刻表データ,
+    :return:    # String?:今日の運行ダイヤ
+                # array：toDaigaku  大学行きの今日の時刻表データ,
                 # array：toYakusa   八草行きの今日の時刻表データ,
                 # int：toDaigakuFirst  大学行きの始発時間(分),
                 # int：toYakusaFirst   八草行きの始発時間(分)
@@ -101,7 +94,6 @@ fun getTodayTimetable(): daiyaData {
     //　今日の日付をYYYY-MM-DDの形式で取得
     // val today = "2020-6-18"
     val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-//    Log.w("今日の日付", today)
 
     // 時刻表データを定義(JSON形式)
     val A1Map = mapOf(0 to null, 1 to null, 2 to null, 3 to null, 4 to null, 5 to null, 6 to null, 7 to null, 8 to listOf(0,5,10,15,20,25,30,35,40,45,50,55), 9 to listOf(0,5,10,15,20,25,30,35,40,50,55), 10 to listOf(0,5,10,15,20,25,30,35,45,55), 11 to listOf(5,15,25,35,45,55), 12 to listOf(5,15,25,35,45,55), 13 to listOf(5,20,35,50), 14 to listOf(5,15,25,35,45,55), 15 to listOf(5,15,30,45), 16 to listOf(0,15,30,45), 17 to listOf(0,10,25,40), 18 to listOf(0,15,45), 19 to listOf(0,15,30,45), 20 to listOf(0,30), 21 to listOf(0), 22 to null, 23 to null)
@@ -114,16 +106,6 @@ fun getTodayTimetable(): daiyaData {
 
     // 今日のダイヤを取り出す
     val daiya: String? = daiyaMap[today]
-    // console.log(daiya);
-//    if (daiya != null) {
-//        Log.v("今日のダイヤ", daiya)
-//    }
-
-//    // 今日のダイヤを基に運行時刻を選択
-//    var toDaigaku:           // その日の全ての大学行きの出発時間(分)を入れる変数
-//    var toYakusa =           // その日の全ての八草行きの出発時間(分)を入れる変数
-//    var toDaigakuFirst =     // 最初の大学行きの出発時間(分)を入れる変数
-//    var toYakusaFirst =      // 最初の八草行きの出発時間(分)を入れる変数
 
     when (daiya) {
         "A" -> return daiyaData(daiya, A1Map, A2Map, 0, 20)
@@ -152,8 +134,8 @@ fun getNextMin(timeTable: Map<Int, List<Int>?>, hour: Int): NextInfo {
 
     return if (result == -1) {
         // Triple(getNearVal(timeTable[hour + 1], mode = 1), hour+1, true)
-        NextInfo(getNearVal(timeTable[hour + 1], mode = 1), hour+1, true)
-    }else {
+        NextInfo(getNearVal(timeTable[hour + 1], mode = 1), hour + 1, true)
+    } else {
         // Triple(result, hour, false)
         NextInfo(result, hour, false)
     }
@@ -181,7 +163,7 @@ fun getAfterNextMin(flag: Boolean, timeTable: Map<Int, List<Int>?>, hour: Int, h
             retHour += 1
         }
     } else {
-        result = getNearVal(timeTable[hour + 1], mode = 3, reset = true);
+        result = getNearVal(timeTable[hour + 1], mode = 3, isReset = true);
         retHour += 1
         if (result == -1) {
             result = getNearVal(timeTable[hour + 2], mode = 1)
@@ -194,7 +176,7 @@ fun getAfterNextMin(flag: Boolean, timeTable: Map<Int, List<Int>?>, hour: Int, h
 
 fun getAllData(): ReturnData {
     val todayInfo = getTodayTimetable()     // 今日の運行時刻表を取得(バスが無い日はnull, null, 0, 0が返ってくる)
-    val hour: Int = LocalTime.now().hour  // 現在の時間(hour)を取得
+    val hour: Int = LocalTime.now().hour-10  // 現在の時間(hour)を取得
 
     //　大学行きの次のバスの出発時間を調べる(-1が帰ってきた場合はその時間のバスはもう無い)
     val toDaigakuInfo = getNextMin(todayInfo.toDaigaku, hour)
