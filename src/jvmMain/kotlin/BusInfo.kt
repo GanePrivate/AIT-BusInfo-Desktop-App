@@ -176,7 +176,7 @@ fun getAfterNextMin(flag: Boolean, timeTable: Map<Int, List<Int>?>, hour: Int, h
 
 fun getAllData(): ReturnData {
     val todayInfo = getTodayTimetable()     // 今日の運行時刻表を取得(バスが無い日はnull, null, 0, 0が返ってくる)
-    val hour: Int = LocalTime.now().hour-10  // 現在の時間(hour)を取得
+    val hour: Int = LocalTime.now().hour  // 現在の時間(hour)を取得
 
     //　大学行きの次のバスの出発時間を調べる(-1が帰ってきた場合はその時間のバスはもう無い)
     val toDaigakuInfo = getNextMin(todayInfo.toDaigaku, hour)
