@@ -10,9 +10,9 @@ jobs:
   #################
   # Set build Job #
   #################
-  build:
+  build-deb:
     # Name the Job
-    name: Build by Gradle
+    name: Build deb
     # Set the agent to run on
     runs-on: ubuntu-latest
 
@@ -32,7 +32,7 @@ jobs:
           
       - name: Build with Gradle
         run: ./gradlew packageDeb
-
+      
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -42,6 +42,7 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }} 
       
+      # Linux(debファイルをコンパイル)
       - name: Upload Release deb
         id: upload_release_asset
         uses: actions/upload-release-asset@v1.0.1
@@ -51,4 +52,44 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: build/compose/binaries/main/deb/ait-businfo_1.0.0-1_amd64.deb
           asset_name: ait-businfo.deb
+          asset_content_type: application/zip
+
+  build-exe:
+    name: Build msi
+    runs-on: windows-2019
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      ################################
+      # Run Build                    #
+      ################################
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+          
+      - name: Build with Gradle
+        run: ./gradlew packageMsi
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }} 
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }} 
+      
+      # Windows(msiファイルをコンパイル)
+      - name: Upload Release msi
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/compose/binaries/main/msi/AIT-busInfo-1.0.0.msi
+          asset_name: ait-businfo.msi
           asset_content_type: application/zip
