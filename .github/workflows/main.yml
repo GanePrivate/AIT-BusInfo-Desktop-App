@@ -1,0 +1,39 @@
+on:
+  push:
+    tags: '*ver.*'
+
+################
+# Set the Jobs #
+################
+jobs:
+
+  #################
+  # Set build Job #
+  #################
+  build:
+    # Name the Job
+    name: Build by Gradle
+    # Set the agent to run on
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      ################################
+      # Run Build                    #
+      ################################
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+          
+      - name: Build with Gradle
+        run: ./gradlew packageDeb
+      - name: Archive build results
+        uses: actions/upload-artifact@v2
+        with:
+          name: ait-businfo-amd64
+          path: build/compose/binaries/main/deb
