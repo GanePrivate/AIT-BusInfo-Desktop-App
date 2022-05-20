@@ -80,7 +80,7 @@ jobs:
           name: msi
 
       - name: Upload Release deb
-        id: upload_release_asset
+        id: upload_release_asset_deb
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
@@ -91,7 +91,7 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload Release msi
-        id: upload_release_asset
+        id: upload_release_asset_msi
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
