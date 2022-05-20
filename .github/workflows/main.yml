@@ -80,7 +80,7 @@ jobs:
           path: ./AIT-busInfo-Windows.zip
 
   build-macos:
-    name: Build macOS app
+    name: Build dmg
     runs-on: macos-latest
     steps:
       - name: Checkout Code
@@ -94,17 +94,13 @@ jobs:
           java-version: 17
           
       - name: Build with Gradle
-        run: ./gradlew createDistributable
-
-      - name: Create Zip File
-        run: |
-          zip -ry ./AIT-busInfo-macOS.zip build/compose/binaries/main/app
+        run: ./gradlew packageDmg
 
       - name: Upload build result
         uses: actions/upload-artifact@v3
         with:
-          name: app
-          path: ./AIT-busInfo-macOS.zip
+          name: dmg
+          path: build/compose/binaries/main/dmg/AIT-busInfo-1.0.0.dmg
 
 
 
@@ -137,10 +133,10 @@ jobs:
         with:
           name: exe
 
-      - name: Download app data
+      - name: Download dmg data
         uses: actions/download-artifact@v3
         with:
-          name: app
+          name: dmg
 
       - name: Upload Release deb
         id: upload_release_asset_deb
@@ -175,13 +171,13 @@ jobs:
           asset_name: AIT-busInfo-Windows.zip
           asset_content_type: application/zip
 
-      - name: Upload Release app
-        id: upload_release_asset_app
+      - name: Upload Release dmg
+        id: upload_release_asset_dmg
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: AIT-busInfo-macOS.zip
-          asset_name: AIT-busInfo-macOS.zip
+          asset_path: AIT-busInfo-1.0.0.dmg
+          asset_name: AIT-busInfo-macOS.dmg
           asset_content_type: application/zip
