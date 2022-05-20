@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: rpm
-          path: build/compose/binaries/main/rpm/ait-businfo_1.0.0_amd64.rpm
+          path: build/compose/binaries/main/rpm/ait-businfo-1.0.0-1.x86_64.rpm
 
   build-exe:
     name: Build exe
@@ -142,7 +142,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ait-businfo_1.0.0-1_amd64.deb
-          asset_name: ait-businfo-linux.deb
+          asset_name: ait-businfo-linux_amd64.deb
           asset_content_type: application/zip
 
       - name: Upload Release rpm
@@ -152,8 +152,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ait-businfo_1.0.0_amd64.rpm
-          asset_name: ait-businfo-linux.rpm
+          asset_path: ait-businfo-1.0.0-1.x86_64.rpm
+          asset_name: ait-businfo-linux_amd64.rpm
           asset_content_type: application/zip
 
       - name: Upload Release exe
