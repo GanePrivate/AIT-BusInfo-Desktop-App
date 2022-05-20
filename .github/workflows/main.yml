@@ -95,12 +95,17 @@ jobs:
           
       - name: Build with Gradle
         run: ./gradlew createDistributable
+
+      - name: Create Zip File
+        uses: montudor/action-zip@v0.1.0
+        with: 
+          args: zip -qq -r ./AIT-busInfo-macOS.zip build/compose/binaries/main/app
       
       - name: Upload build result
         uses: actions/upload-artifact@v3
         with:
           name: app
-          path: build/compose/binaries/main/app/AIT-busInfo.app
+          path: ./AIT-busInfo-macOS.zip
 
 
 
@@ -178,6 +183,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: AIT-busInfo.app
-          asset_name: ait-businfo-macos.app
+          asset_path: AIT-busInfo-macOS.zip
+          asset_name: AIT-busInfo-macOS.zip
           asset_content_type: application/zip
