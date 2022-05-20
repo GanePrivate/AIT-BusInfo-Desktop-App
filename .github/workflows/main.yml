@@ -77,7 +77,7 @@ jobs:
 
   build-macos:
     name: Build dmg
-    runs-on: macos-latest
+    runs-on: macos-10.15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
