@@ -70,9 +70,8 @@ jobs:
         run: ./gradlew createDistributable
 
       - name: Create Zip File - Windows
-        uses: montudor/action-zip@v0.1.0
-        with: 
-          args: zip -qq -r ./AIT-busInfo-Windows.zip build/compose/binaries/main/app/AIT-busInfo
+        run: |
+          powershell Compress-Archive -Path build/compose/binaries/main/app/AIT-busInfo -DestinationPath ./AIT-busInfo-Windows.zip
       
       - name: Upload build result
         uses: actions/upload-artifact@v3
