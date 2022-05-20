@@ -97,10 +97,9 @@ jobs:
         run: ./gradlew createDistributable
 
       - name: Create Zip File
-        uses: montudor/action-zip@v0.1.0
-        with: 
-          args: zip -qq -r ./AIT-busInfo-macOS.zip build/compose/binaries/main/app
-      
+        run: |
+          zip -ry ./AIT-busInfo-macOS.zip build/compose/binaries/main/app
+
       - name: Upload build result
         uses: actions/upload-artifact@v3
         with:
