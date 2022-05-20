@@ -2,89 +2,62 @@ on:
   push:
     tags: '*ver.*'
 
-################
-# Set the Jobs #
-################
 jobs:
+  build:
+    name: Release binary
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: ait-businfo-gnu.deb
+            asset_name: packageDeb
 
-  make-Release:
-    name: Build deb
-    runs-on: ubuntu-latest
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            artifact_name: ait-businfo-musl.deb
+            asset_name: packageDeb
+
+          - os: ubuntu-latest
+            target: x86_64-pc-windows-gnu
+            artifact_name: ait-businfo.msi
+            asset_name: packageMsi
+
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: ait-businfo.dmg
+            asset_name: packageDmg
+
+
+    runs-on: ${{ matrix.os }}
+
     steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }} 
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }} 
-
-  #################
-  # Set build Job #
-  #################
-  build-deb:
-    # Name the Job
-    name: Build deb
-    # Set the agent to run on
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
-      ################################
-      # Run Build                    #
-      ################################
       - name: Set up JDK 17
         uses: actions/setup-java@v1
         with:
           java-version: 17
-          
-      - name: Build with Gradle
-        run: ./gradlew packageDeb
-      
-      # Linux(debファイルをコンパイル)
-      - name: Upload Release deb
-        id: upload_release_asset
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/compose/binaries/main/deb/ait-businfo_1.0.0-1_amd64.deb
-          asset_name: ait-businfo.deb
-          asset_content_type: application/zip
 
-  build-exe:
-    name: Build msi
-    runs-on: windows-2019
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          fetch-depth: 0
-      ################################
-      # Run Build                    #
-      ################################
-      - name: Set up JDK 17
-        uses: actions/setup-java@v1
+          toolchain: stable
+          override: true
+
+      - name: Cross build with all features
+        uses: actions-rs/cargo@v1
         with:
-          java-version: 17
-          
-      - name: Build with Gradle
-        run: ./gradlew packageMsi
-      
-      # Windows(msiファイルをコンパイル)
-      - name: Upload Release msi
-        id: upload_release_asset
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          use-cross: true 
+          command: ./gradlew
+          args: ${{ matrix.target }}
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@2.1.1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/compose/binaries/main/msi/AIT-busInfo-1.0.0.msi
-          asset_name: ait-businfo.msi
-          asset_content_type: application/zip
+          repo_token: ${{ secrets.GH_PAT }}
+          file: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}
+          tag: ${{ github.ref }}
+          overwrite: true
