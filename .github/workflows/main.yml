@@ -67,17 +67,22 @@ jobs:
           java-version: 17
           
       - name: Build with Gradle
-        run: ./gradlew packageExe
+        run: ./gradlew createDistributable
+
+      - name: Create Zip File - Windows
+        uses: montudor/action-zip@v0.1.0
+        with: 
+          args: zip -qq -r ./AIT-busInfo-Windows.zip build/compose/binaries/main/app/AIT-busInfo
       
       - name: Upload build result
         uses: actions/upload-artifact@v3
         with:
           name: exe
-          path: build/compose/binaries/main/exe/AIT-busInfo-1.0.0.exe
+          path: ./AIT-busInfo-Windows.zip
 
   build-macos:
-    name: Build dmg
-    runs-on: macos-10.15
+    name: Build macOS app
+    runs-on: macos-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -90,13 +95,13 @@ jobs:
           java-version: 17
           
       - name: Build with Gradle
-        run: ./gradlew packageDmg
+        run: ./gradlew createDistributable
       
       - name: Upload build result
         uses: actions/upload-artifact@v3
         with:
-          name: dmg
-          path: build/compose/binaries/main/dmg/AIT-busInfo-1.0.0.dmg
+          name: app
+          path: build/compose/binaries/main/app/AIT-busInfo.app
 
 
 
@@ -129,10 +134,10 @@ jobs:
         with:
           name: exe
 
-      - name: Download dmg data
+      - name: Download app data
         uses: actions/download-artifact@v3
         with:
-          name: dmg
+          name: app
 
       - name: Upload Release deb
         id: upload_release_asset_deb
@@ -163,17 +168,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: AIT-busInfo-1.0.0.exe
-          asset_name: ait-businfo-windows.exe
+          asset_path: AIT-busInfo-Windows.zip
+          asset_name: AIT-busInfo-Windows.zip
           asset_content_type: application/zip
 
-      - name: Upload Release dmg
-        id: upload_release_asset_dmg
+      - name: Upload Release app
+        id: upload_release_asset_app
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: AIT-busInfo-1.0.0.dmg
-          asset_name: ait-businfo-macos.dmg
+          asset_path: AIT-busInfo.app
+          asset_name: ait-businfo-macos.app
           asset_content_type: application/zip
