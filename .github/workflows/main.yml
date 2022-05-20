@@ -102,7 +102,7 @@ jobs:
 
   make-release:
     name: make release
-    needs: [build-deb, build-exe]
+    needs: [build-deb, build-rpm, build-exe, build-macos]
     runs-on: ubuntu-latest
     steps:
       - name: Create Release
