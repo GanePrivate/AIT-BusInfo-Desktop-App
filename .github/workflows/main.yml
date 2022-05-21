@@ -79,8 +79,31 @@ jobs:
           name: exe
           path: ./AIT-busInfo-Windows.zip
 
-  build-macos:
-    name: Build dmg
+  # build-macos:
+  #   name: Build dmg
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+    
+  #     - name: Set up JDK 17
+  #       uses: actions/setup-java@v1
+  #       with:
+  #         java-version: 17
+          
+  #     - name: Build with Gradle
+  #       run: ./gradlew packageDmg
+
+  #     - name: Upload build result
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: dmg
+  #         path: build/compose/binaries/main/dmg/AIT-busInfo-1.0.0.dmg
+
+  build-jar:
+    name: Build jar
     runs-on: macos-latest
     steps:
       - name: Checkout Code
@@ -94,19 +117,19 @@ jobs:
           java-version: 17
           
       - name: Build with Gradle
-        run: ./gradlew packageDmg
+        run: ./gradlew packageUberJarForCurrentOS
 
       - name: Upload build result
         uses: actions/upload-artifact@v3
         with:
-          name: dmg
-          path: build/compose/binaries/main/dmg/AIT-busInfo-1.0.0.dmg
+          name: jar
+          path: build/compose/jars/AIT-busInfo-macos-x64-1.0.0.jar
 
 
 
   make-release:
     name: make release
-    needs: [build-deb, build-rpm, build-exe, build-macos]
+    needs: [build-deb, build-rpm, build-exe, build-jar]
     runs-on: ubuntu-latest
     steps:
       - name: Create Release
@@ -133,10 +156,15 @@ jobs:
         with:
           name: exe
 
+      # - name: Download dmg data
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: dmg
+
       - name: Download dmg data
         uses: actions/download-artifact@v3
         with:
-          name: dmg
+          name: jar
 
       - name: Upload Release deb
         id: upload_release_asset_deb
@@ -171,13 +199,24 @@ jobs:
           asset_name: AIT-busInfo-Windows.zip
           asset_content_type: application/zip
 
-      - name: Upload Release dmg
-        id: upload_release_asset_dmg
+      # - name: Upload Release dmg
+      #   id: upload_release_asset_dmg
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: AIT-busInfo-1.0.0.dmg
+      #     asset_name: AIT-busInfo-macOS.dmg
+      #     asset_content_type: application/zip
+
+      - name: Upload Release jar
+        id: upload_release_asset_jar
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: AIT-busInfo-1.0.0.dmg
-          asset_name: AIT-busInfo-macOS.dmg
+          asset_path: AIT-busInfo-macos-x64-1.0.0.jar
+          asset_name: AIT-busInfo.jar
           asset_content_type: application/zip
