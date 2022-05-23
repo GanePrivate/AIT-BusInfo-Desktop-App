@@ -1,4 +1,4 @@
-![動作サンプル](https://user-images.githubusercontent.com/39085974/169861288-f989fe92-e6cc-4610-836b-a1617a91ae1b.gif)
+![動作サンプル](https://user-images.githubusercontent.com/39085974/169861963-5f042f66-0730-4f13-848d-3e79673c44c6.gif)
 
 # 使用方法
 ## STEP1: ダウンロード
