@@ -15,15 +15,6 @@ jarファイルを実行するにはJavaの実行環境をインストールす�
 ### ダウンロードページ
 https://www.oracle.com/java/technologies/downloads/
 
-macOSの方は使用している機種のチップが `Intel` なのか `M1` なのかによってインストールするファイルが違うので注意してください！
-
-#### Intelチップの場合
-`x64 DMG Installer` の方をダウンロードしてインストールしてください．
-
-#### M1チップの場合
-`Arm 64 DMG Installer` の方をダウンロードしてインストールしてください．
-
-
 ## STEP3: インストール・起動
 
 ### Windowsの場合
